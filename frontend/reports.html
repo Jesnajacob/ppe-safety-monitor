@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports — SafetyVision AI</title>
+  <meta name="description" content="Generate and export workplace safety inspection reports with PPE compliance statistics."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .report-tabs {
+      display: flex; gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+    .report-tab {
+      padding: 8px 20px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all var(--duration);
+      font-family: inherit;
+    }
+    .report-tab.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .report-tab:hover:not(.active) { color: var(--text-secondary); }
+
+    .report-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .report-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .report-stat-icon { font-size: 20px; margin-bottom: 8px; }
+    .report-stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px; font-weight: 800;
+      color: var(--text-primary);
+    }
+    .report-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .highlight-value { color: var(--blue-light); }
+    .highlight-safe  { color: var(--safe); }
+    .highlight-danger{ color: var(--danger); }
+
+    .report-header-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .key-insight {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .key-insight-icon { font-size: 28px; flex-shrink: 0; }
+    .key-insight-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+    .key-insight-value { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <!-- Report period tabs + export -->
+      <div class="report-header-bar">
+        <div class="report-tabs">
+          <button class="report-tab" id="tab-daily" onclick="switchPeriod('daily')">Daily</button>
+          <button class="report-tab active" id="tab-weekly" onclick="switchPeriod('weekly')">Weekly</button>
+          <button class="report-tab" id="tab-monthly" onclick="switchPeriod('monthly')">Monthly</button>
+          <button class="report-tab" id="tab-all" onclick="switchPeriod('all')">All Time</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="printReport()">🖨️ Print PDF</button>
+          <button class="btn btn-primary btn-sm" onclick="exportCsv()">📥 Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="report-summary-grid" id="report-summary-grid">
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+        <div class="report-stat-card skeleton" style="height:90px;"></div>
+      </div>
+
+      <!-- Key Insights -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;" id="key-insights">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📈 Daily Violations Trend (Last 30 days)</div>
+          </div>
+          <div class="chart-container" style="height:220px;">
+            <canvas id="daily-trend-chart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎯 Safety Score Trend</div>
+          </div>
+          <div class="chart-container" style="height:220px;">
+            <canvas id="score-trend-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/reports.js"></script>
+</body>
+</html>

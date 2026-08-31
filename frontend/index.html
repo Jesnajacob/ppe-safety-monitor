@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — AI Workplace Safety & PPE Monitoring</title>
+  <meta name="description" content="Secure login for the AI Workplace Safety and PPE Monitoring platform for construction and industrial sites."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .login-input-group { position: relative; }
+    .login-input-group .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; pointer-events: none;
+    }
+    .login-input-group .form-input { padding-left: 42px; }
+    .password-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 18px; transition: color var(--duration);
+    }
+    .password-toggle:hover { color: var(--text-primary); }
+    .login-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--duration);
+      box-shadow: 0 0 30px rgba(59,130,246,0.3);
+      margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 0 40px rgba(59,130,246,0.5); }
+    .login-btn:active { transform: translateY(0); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .particles {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: rgba(59, 130, 246, 0.6);
+      border-radius: 50%;
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-20px) scale(1); opacity: 0; }
+    }
+    .feature-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px;
+    }
+    .feature-tag {
+      padding: 4px 10px;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  <div class="login-bg-grid"></div>
+  <div class="login-bg-glow"></div>
+
+  <div class="login-page">
+    <div class="login-container">
+
+      <!-- Logo -->
+      <div style="text-align:center; margin-bottom: 32px;">
+        <div style="display:inline-flex; align-items:center; gap:14px; padding: 16px 24px;
+             background: rgba(17,32,56,0.7); border-radius:var(--radius-xl);
+             border: 1px solid rgba(59,130,246,0.2);">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+               border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;
+               font-size:28px;box-shadow:0 0 30px rgba(59,130,246,0.4);">🦺</div>
+          <div style="text-align:left;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;
+                 background:linear-gradient(135deg,#f1f5f9,#60a5fa);-webkit-background-clip:text;
+                 -webkit-text-fill-color:transparent;">SafetyVision AI</div>
+            <div style="font-size:11px;color:var(--text-muted);">PPE & Workplace Safety Monitor</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card -->
+      <div class="login-card">
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to access the safety monitoring dashboard</p>
+
+        <div class="login-error" id="login-error">
+          ❌ Invalid email or password. Please try again.
+        </div>
+
+        <form id="login-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <div class="login-input-group">
+              <span class="input-icon">📧</span>
+              <input type="email" id="email" class="form-input"
+                     placeholder="admin@safety.com"
+                     value="admin@safety.com" required autocomplete="email"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="login-input-group">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="password" class="form-input"
+                     placeholder="Enter your password"
+                     value="admin123" required autocomplete="current-password"/>
+              <button type="button" class="password-toggle" id="pw-toggle" title="Toggle password">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn" id="login-btn">
+            <span id="btn-text">🔐 Sign In</span>
+            <span id="btn-spinner" class="loading-spinner" style="width:20px;height:20px;display:none;"></span>
+          </button>
+        </form>
+
+        <div class="login-demo-creds">
+          <strong>Demo Credentials</strong><br/>
+          Email: <strong>admin@safety.com</strong> &nbsp;|&nbsp; Password: <strong>admin123</strong>
+        </div>
+
+        <div class="feature-tags">
+          <span class="feature-tag">🤖 AI Detection</span>
+          <span class="feature-tag">🦺 PPE Compliance</span>
+          <span class="feature-tag">🚧 Zone Monitoring</span>
+          <span class="feature-tag">📊 Analytics</span>
+          <span class="feature-tag">📋 Reports</span>
+        </div>
+      </div>
+
+      <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:20px;">
+        MSc Computer Science — Computer Vision Project Demo &nbsp;·&nbsp; 2026
+      </p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (getToken()) window.location.href = 'dashboard.html';
+
+    // Floating particles
+    const particleContainer = document.getElementById('particles');
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = (-Math.random() * 20) + 's';
+      p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+      particleContainer.appendChild(p);
+    }
+
+    // Password toggle
+    document.getElementById('pw-toggle').addEventListener('click', function() {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+      this.textContent = pw.type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Login form
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const btnText = document.getElementById('btn-text');
+      const spinner = document.getElementById('btn-spinner');
+      const errorEl = document.getElementById('login-error');
+
+      btn.disabled = true;
+      btnText.textContent = 'Signing in...';
+      spinner.style.display = 'block';
+      errorEl.style.display = 'none';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setToken(data.access_token);
+          setUser(data.user);
+          showToast('Welcome back!', `Logged in as ${data.user.full_name}`, 'success', 2000);
+          setTimeout(() => window.location.href = 'dashboard.html', 500);
+        } else {
+          const err = await res.json().catch(() => ({}));
+          errorEl.textContent = '❌ ' + (err.detail || 'Invalid credentials. Please try again.');
+          errorEl.style.display = 'block';
+        }
+      } catch (err) {
+        errorEl.textContent = '❌ Cannot connect to server. Make sure the backend is running on port 8000.';
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = '🔐 Sign In';
+        spinner.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — SafetyVision AI</title>
+  <meta name="description" content="Configure PPE requirements, detection thresholds, alerts, and user settings."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;">
+        
+        <!-- PPE Requirements Configuration -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🦺 Mandatory PPE Configuration</div>
+              <div class="card-subtitle">Select which safety items trigger violations when missing</div>
+            </div>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">🪖 Safety Helmet</div>
+              <div class="toggle-desc">Mandatory hard hat on site</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-require-helmet" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">🦺 Safety Vest (High-Vis)</div>
+              <div class="toggle-desc">High visibility reflective vest</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-require-vest" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">🧤 Safety Gloves</div>
+              <div class="toggle-desc">Heavy duty hand protection</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-require-gloves" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">👟 Safety Shoes / Steel-Toe Boots</div>
+              <div class="toggle-desc">Reinforced protective footwear</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-require-shoes" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="mt-4">
+            <button class="btn btn-primary btn-sm" onclick="savePPESettings()">💾 Save PPE Policy</button>
+          </div>
+        </div>
+
+        <!-- AI Model & Detection Thresholds -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🤖 AI Detection & Thresholds</div>
+              <div class="card-subtitle">Computer vision sensitivity settings</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="set-confidence">Detection Confidence Threshold: <span id="conf-val" class="font-bold text-blue">60%</span></label>
+            <input type="range" class="range-input" id="set-confidence" min="30" max="95" value="60" oninput="document.getElementById('conf-val').textContent = this.value + '%'"/>
+            <div class="flex justify-between text-xs text-muted mt-1">
+              <span>30% (High Recall)</span>
+              <span>60% (Balanced)</span>
+              <span>95% (High Precision)</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="set-site-name">Site / Facility Name</label>
+            <input type="text" class="form-input" id="set-site-name" value="Construction Site A"/>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">⚡ Demo Detection Engine</div>
+              <div class="toggle-desc">Simulate YOLO inference results for testing</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-demo-mode" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="mt-4">
+            <button class="btn btn-primary btn-sm" onclick="saveAISettings()">💾 Save Model Settings</button>
+          </div>
+        </div>
+
+        <!-- Notification & Alert Settings -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🔔 Alert & Notification Rules</div>
+              <div class="card-subtitle">Dispatch immediate safety alerts</div>
+            </div>
+          </div>
+
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Real-time Dashboard Popups</div>
+              <div class="toggle-desc">Show prominent modals on critical violations</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="set-alert-popup" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="form-group mt-2">
+            <label class="form-label" for="set-alert-email">Safety Officer Dispatch Email</label>
+            <input type="email" class="form-input" id="set-alert-email" value="admin@safety.com"/>
+          </div>
+
+          <div class="mt-4">
+            <button class="btn btn-primary btn-sm" onclick="saveAlertSettings()">💾 Save Alerts</button>
+          </div>
+        </div>
+
+        <!-- User Profile & Account -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">👤 User Profile & Session</div>
+              <div class="card-subtitle">Account credentials and logout</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="user-fullname">Full Name</label>
+            <input type="text" class="form-input" id="user-fullname" value="Safety Administrator"/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="user-email">Email Address</label>
+            <input type="email" class="form-input" id="user-email" value="admin@safety.com"/>
+          </div>
+
+          <div class="flex gap-3 mt-4">
+            <button class="btn btn-primary btn-sm" onclick="saveUserProfile()">💾 Update Profile</button>
+            <button class="btn btn-danger btn-sm" onclick="logout()">🚪 Sign Out</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

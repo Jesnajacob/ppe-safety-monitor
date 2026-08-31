@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Media Analysis — SafetyVision AI</title>
+  <meta name="description" content="Upload construction site images or videos for AI-powered PPE compliance analysis."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .file-info-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .file-icon-lg { font-size: 32px; flex-shrink: 0; }
+    .file-info-details { flex: 1; }
+    .file-info-name {
+      font-weight: 600; color: var(--text-primary);
+      font-size: 14px; margin-bottom: 4px;
+      word-break: break-all;
+    }
+    .file-info-meta { font-size: 11px; color: var(--text-muted); }
+    .preview-container {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+      margin-top: 20px;
+      max-height: 400px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-container img,
+    .preview-container video {
+      max-height: 400px;
+      width: 100%;
+      object-fit: contain;
+    }
+    .upload-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    .step-number {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--blue-glow);
+      border: 2px solid var(--blue);
+      color: var(--blue-light);
+      font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .step-icon { font-size: 24px; margin-bottom: 8px; }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .step-desc  { font-size: 11px; color: var(--text-muted); }
+    .step-card.active .step-number {
+      background: rgba(59,130,246,0.2);
+      border-color: var(--blue-light);
+      box-shadow: 0 0 15px rgba(59,130,246,0.4);
+    }
+    .step-card.done .step-number {
+      background: var(--safe-bg);
+      border-color: var(--safe);
+      color: var(--safe);
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <!-- Steps -->
+      <div class="upload-steps" id="upload-steps">
+        <div class="step-card active" id="step1-card">
+          <div class="step-number">1</div>
+          <div class="step-icon">📤</div>
+          <div class="step-title">Upload Media</div>
+          <div class="step-desc">Choose image or video from your device</div>
+        </div>
+        <div class="step-card" id="step2-card">
+          <div class="step-number">2</div>
+          <div class="step-icon">🤖</div>
+          <div class="step-title">AI Analysis</div>
+          <div class="step-desc">Computer vision detects workers and PPE</div>
+        </div>
+        <div class="step-card" id="step3-card">
+          <div class="step-number">3</div>
+          <div class="step-icon">📊</div>
+          <div class="step-title">View Results</div>
+          <div class="step-desc">See compliance report and bounding boxes</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+
+        <!-- Upload area -->
+        <div>
+          <!-- Drop zone -->
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <span class="upload-icon">☁️</span>
+            <h3>Drag & Drop or Click to Upload</h3>
+            <p>Upload a construction site or factory image/video for AI safety analysis</p>
+            <div class="upload-formats">
+              <span class="format-tag">JPG</span>
+              <span class="format-tag">JPEG</span>
+              <span class="format-tag">PNG</span>
+              <span class="format-tag">MP4</span>
+              <span class="format-tag">AVI</span>
+              <span class="format-tag">MOV</span>
+            </div>
+            <p style="margin-top:12px;font-size:11px;color:var(--text-muted);">Max file size: 200 MB</p>
+          </div>
+          <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.mp4,.avi,.mov" style="display:none;"/>
+
+          <!-- File info -->
+          <div id="file-info" class="hidden">
+            <div class="file-info-card">
+              <div class="file-icon-lg" id="file-icon">🖼️</div>
+              <div class="file-info-details">
+                <div class="file-info-name" id="file-name">filename.jpg</div>
+                <div class="file-info-meta" id="file-meta">Size · Type</div>
+                <div class="progress-bar" id="upload-progress-bar" style="display:none;margin-top:8px;">
+                  <div class="progress-fill" id="upload-progress-fill" style="width:0%"></div>
+                </div>
+                <div id="upload-status" style="font-size:11px;color:var(--blue-light);margin-top:4px;"></div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="clearUpload()">✕ Clear</button>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview-container" id="preview-container"></div>
+
+            <!-- Analyze button -->
+            <div style="margin-top:20px;display:flex;gap:12px;">
+              <button class="btn btn-primary btn-lg" id="analyze-btn" style="flex:1;" disabled>
+                🤖 Analyze Safety
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side panel — instructions + recent -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card card-sm">
+            <div class="card-title" style="margin-bottom:12px;">📖 How It Works</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--text-secondary);">
+              <div class="flex gap-2 items-start">
+                <span>🪖</span><span>Detects <strong>Safety Helmets</strong> on all workers</span>
+              </div>
+              <div class="flex gap-2 items-start">
+                <span>🦺</span><span>Checks for <strong>Safety Vests</strong></span>
+              </div>
+              <div class="flex gap-2 items-start">
+                <span>🧤</span><span>Identifies <strong>Safety Gloves</strong></span>
+              </div>
+              <div class="flex gap-2 items-start">
+                <span>👟</span><span>Verifies <strong>Safety Shoes</strong></span>
+              </div>
+              <div class="flex gap-2 items-start">
+                <span>🚧</span><span>Flags <strong>Restricted Zone</strong> entries</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-sm" style="background:var(--warning-bg);border-color:var(--warning-border);">
+            <div class="card-title" style="color:var(--warning);margin-bottom:8px;">⚡ Demo Mode Active</div>
+            <p style="font-size:12px;color:var(--text-muted);">
+              This system uses a simulated AI detection engine. Results are realistic demo data.
+              Upload any image to see the system in action.
+            </p>
+          </div>
+
+          <div class="card card-sm">
+            <div class="card-title" style="margin-bottom:12px;">📂 Recent Analyses</div>
+            <div id="recent-analyses" style="font-size:12px;color:var(--text-muted);">
+              Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Violation Alert Modal -->
+<div class="modal-overlay hidden" id="violation-alert-modal">
+  <div class="modal alert-modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">⚠️ SAFETY VIOLATION DETECTED</div>
+        <div class="modal-subtitle">Immediate attention required</div>
+      </div>
+      <button class="modal-close" onclick="closeViolationModal()">×</button>
+    </div>
+    <div class="modal-body" id="violation-alert-body">
+      <!-- populated by JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeViolationModal()">Dismiss</button>
+      <button class="btn btn-warning" onclick="acknowledgeAndClose()">⚠️ Acknowledge</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/upload.js"></script>
+</body>
+</html>

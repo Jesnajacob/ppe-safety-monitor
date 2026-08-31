@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Restricted Zones — SafetyVision AI</title>
+  <meta name="description" content="Define and manage restricted safety zones for workplace monitoring."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .zones-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+    .zone-canvas-toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .zone-name-input {
+      flex: 1; min-width: 120px;
+      padding: 7px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .zone-name-input:focus { border-color: var(--border-focus); }
+    .color-picker-wrap {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .color-pick {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      padding: 2px;
+      background: var(--bg-card);
+    }
+    .canvas-instructions {
+      padding: 8px 16px;
+      font-size: 11px; color: var(--text-muted);
+      background: rgba(59,130,246,0.04);
+      border-bottom: 1px solid var(--border);
+    }
+    #zone-canvas {
+      display: block;
+      width: 100%;
+      height: 400px;
+      cursor: crosshair;
+      background: var(--bg-surface);
+    }
+    .violation-alert-strip {
+      padding: 12px 16px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+      display: none;
+    }
+    .violation-alert-strip.show { display: block; animation: pulse-border 2s infinite; }
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--danger-border); }
+      50%       { border-color: var(--danger); box-shadow: 0 0 20px rgba(239,68,68,0.3); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <!-- Violation alert strip -->
+      <div class="violation-alert-strip" id="zone-alert">
+        <strong style="color:var(--danger);">⚠️ RESTRICTED AREA VIOLATION</strong>
+        <p id="zone-alert-text" style="font-size:13px;color:var(--text-secondary);margin-top:4px;"></p>
+      </div>
+
+      <div class="zones-layout">
+
+        <!-- Canvas area -->
+        <div class="card" style="padding:0;overflow:hidden;">
+          <!-- Toolbar -->
+          <div class="zone-canvas-toolbar">
+            <input type="text" class="zone-name-input" id="zone-name-input"
+                   placeholder="Zone name (e.g. Restricted Zone B)"/>
+            <div class="color-picker-wrap">
+              <span style="font-size:12px;color:var(--text-muted);">Color:</span>
+              <input type="color" class="color-pick" id="zone-color-input" value="#EF4444"/>
+            </div>
+            <button class="btn btn-primary btn-sm" id="save-zone-btn" onclick="saveCurrentZone()" disabled>
+              💾 Save Zone
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="clearCurrentDraw()">
+              🗑️ Clear
+            </button>
+          </div>
+
+          <!-- Instructions -->
+          <div class="canvas-instructions">
+            📍 Click on the canvas to draw zone corner points · Click the first point to close the polygon · Minimum 3 points required
+          </div>
+
+          <!-- Canvas -->
+          <canvas id="zone-canvas"></canvas>
+
+          <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);">
+            💡 Tip: Draw polygons around any area you want to mark as restricted.
+            Workers detected in these zones will trigger a Critical violation alert.
+          </div>
+        </div>
+
+        <!-- Zone list panel -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Active zones -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🚧 Active Restricted Zones</div>
+              <span class="badge badge-info" id="zones-count">0 zones</span>
+            </div>
+            <div id="zones-list">
+              <div class="empty-state" style="padding:30px;">
+                <div class="empty-icon" style="font-size:32px;">🚧</div>
+                <h3 style="font-size:14px;">No zones defined</h3>
+                <p>Draw a zone on the canvas to get started</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zone violation log -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Zone Violation Log</div>
+            </div>
+            <div id="zone-violation-log" style="font-size:12px;">
+              <div class="text-muted" style="padding:10px 0;">No zone violations recorded yet.</div>
+            </div>
+          </div>
+
+          <!-- Info card -->
+          <div class="card card-sm" style="background:var(--danger-bg);border-color:var(--danger-border);">
+            <div class="card-title" style="color:var(--danger);margin-bottom:8px;">⚠️ Restricted Zone Rules</div>
+            <ul style="font-size:12px;color:var(--text-secondary);padding-left:16px;line-height:1.8;">
+              <li>Unauthorized personnel must stay clear</li>
+              <li>All entries are logged as Critical violations</li>
+              <li>Immediate supervisor notification required</li>
+              <li>Full PPE mandatory if authorized access</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/zones.js"></script>
+</body>
+</html>

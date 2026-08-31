@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Analysis Results — SafetyVision AI</title>
+  <meta name="description" content="View AI-detected PPE compliance results with annotated bounding boxes per worker."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .analysis-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .analysis-id-badge {
+      padding: 5px 14px;
+      background: var(--blue-glow);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: var(--radius-full);
+      font-size: 12px; font-weight: 600; color: var(--blue-light);
+    }
+    .summary-stat {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+    .summary-stat:last-child { border-bottom: none; }
+    .summary-stat-label { color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .summary-stat-value { font-weight: 700; color: var(--text-primary); }
+    .processing-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      background: var(--safe-bg); border: 1px solid var(--safe-border);
+      border-radius: var(--radius-full);
+      font-size: 11px; color: var(--safe);
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <!-- Header -->
+      <div class="analysis-header">
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">
+            <a href="upload.html" style="color:var(--blue-light);">← Media Analysis</a>
+          </div>
+          <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;">
+            AI Detection Results
+          </h1>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span class="analysis-id-badge" id="analysis-id-badge">Analysis #—</span>
+          <span class="processing-badge" id="demo-badge">⚡ Demo AI Analysis</span>
+          <a href="upload.html" class="btn btn-secondary btn-sm">🔄 New Analysis</a>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="analysis-loading" style="text-align:center;padding:80px 20px;">
+        <div class="loading-spinner" style="margin:0 auto 16px;width:40px;height:40px;border-width:4px;"></div>
+        <p style="color:var(--text-secondary);">Loading analysis results...</p>
+      </div>
+
+      <!-- Results (hidden until loaded) -->
+      <div id="analysis-results" class="hidden">
+
+        <!-- Main analysis layout -->
+        <div class="analysis-layout">
+
+          <!-- Annotated image -->
+          <div>
+            <div class="annotated-image-container" id="image-container">
+              <div class="demo-badge-overlay">⚡ DEMO AI ANALYSIS</div>
+              <img id="annotated-image" src="" alt="AI annotated safety analysis"/>
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
+              🟢 Green = Safe worker &nbsp;·&nbsp; 🔴 Red = PPE violation
+              &nbsp;·&nbsp; 🟡 Orange = Zone violation &nbsp;·&nbsp; 🔵 Blue = PPE item detected
+            </div>
+          </div>
+
+          <!-- Summary panel -->
+          <div class="analysis-summary">
+
+            <!-- Summary stats -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Analysis Summary</div>
+              </div>
+              <div id="summary-stats">
+                <div class="summary-stat">
+                  <span class="summary-stat-label">👷 Total Workers</span>
+                  <span class="summary-stat-value" id="stat-total-workers">—</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">✅ Safe Workers</span>
+                  <span class="summary-stat-value text-safe" id="stat-safe-workers">—</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">🚨 PPE Violations</span>
+                  <span class="summary-stat-value text-danger" id="stat-ppe-violations">—</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">🚧 Zone Violations</span>
+                  <span class="summary-stat-value text-warning" id="stat-zone-violations">—</span>
+                </div>
+                <div class="summary-stat">
+                  <span class="summary-stat-label">⏱️ Processing Time</span>
+                  <span class="summary-stat-value text-muted" id="stat-proc-time">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Safety score -->
+            <div class="card">
+              <div class="card-title" style="margin-bottom:12px;">🎯 Safety Score</div>
+              <div style="text-align:center;">
+                <div class="score-ring" style="width:120px;height:120px;margin:0 auto 12px;">
+                  <svg viewBox="0 0 150 150">
+                    <circle class="score-ring-track" cx="75" cy="75" r="65"/>
+                    <circle class="score-ring-fill" id="score-ring-fill" cx="75" cy="75" r="65"/>
+                  </svg>
+                  <div class="score-ring-text">
+                    <div class="score-number" id="score-pct" style="font-size:24px;">—</div>
+                    <div class="score-label">Score</div>
+                  </div>
+                </div>
+                <div id="score-grade" class="score-grade grade-good">Loading...</div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <a href="violations.html" class="btn btn-danger" style="justify-content:center;">
+                ⚠️ View All Violations
+              </a>
+              <a href="upload.html" class="btn btn-secondary" style="justify-content:center;">
+                🔄 Analyze Another File
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Worker Cards -->
+        <div class="card" style="margin-top:24px;">
+          <div class="card-header">
+            <div class="card-title">👷 Per-Worker Detection Results</div>
+            <div>
+              <span class="badge badge-safe" id="badge-safe">0 Safe</span>
+              <span class="badge badge-danger" id="badge-violations" style="margin-left:6px;">0 Violations</span>
+            </div>
+          </div>
+          <div class="workers-grid" id="workers-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/analysis.js"></script>
+</body>
+</html>

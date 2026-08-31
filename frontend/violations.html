@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Violation Management — SafetyVision AI</title>
+  <meta name="description" content="View, filter, and manage all detected workplace safety and PPE violations."/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .violations-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+    }
+    .violations-count {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; color: var(--text-secondary);
+    }
+    .violations-count strong { color: var(--text-primary); }
+    .action-btn-sm {
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--duration);
+      white-space: nowrap;
+    }
+    .action-btn-sm:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .action-btn-sm.resolve { border-color: var(--safe-border); color: var(--safe); }
+    .action-btn-sm.acknowledge { border-color: var(--warning-border); color: var(--warning); }
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 20px;
+    }
+    .page-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--duration);
+    }
+    .page-btn:hover, .page-btn.active {
+      background: var(--blue-glow); border-color: var(--blue); color: var(--blue-light);
+    }
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-strip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-strip-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px; font-weight: 800;
+      color: var(--text-primary);
+    }
+    .stat-strip-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-container"></div>
+  <div class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <!-- Stats Strip -->
+      <div class="stats-strip" id="stats-strip">
+        <div class="stat-strip-card skeleton" style="height:70px;"></div>
+        <div class="stat-strip-card skeleton" style="height:70px;"></div>
+        <div class="stat-strip-card skeleton" style="height:70px;"></div>
+        <div class="stat-strip-card skeleton" style="height:70px;"></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+        <div class="filters-bar">
+          <span style="font-size:12px;font-weight:600;color:var(--text-muted);">🔍 Filters:</span>
+          <select class="filter-select" id="filter-type">
+            <option value="">All Types</option>
+            <option>Missing Helmet</option>
+            <option>Missing Safety Vest</option>
+            <option>Missing Gloves</option>
+            <option>Missing Safety Shoes</option>
+            <option>Restricted Area Violation</option>
+            <option>Multiple PPE Violations</option>
+          </select>
+          <select class="filter-select" id="filter-severity">
+            <option value="">All Severity</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+          <select class="filter-select" id="filter-status">
+            <option value="">All Status</option>
+            <option>Open</option>
+            <option>Acknowledged</option>
+            <option>Resolved</option>
+          </select>
+          <input type="text" class="filter-input" id="filter-worker" placeholder="Worker ID..."/>
+          <input type="date" class="filter-input" id="filter-date-from"/>
+          <input type="date" class="filter-input" id="filter-date-to"/>
+          <span class="spacer"></span>
+          <button class="btn btn-primary btn-sm" onclick="applyFilters()">Apply</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button>
+          <a href="#" class="btn btn-secondary btn-sm" id="export-csv-btn" onclick="exportCSV(event)">
+            📥 Export CSV
+          </a>
+        </div>
+      </div>
+
+      <!-- Violations Table -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);
+             display:flex;align-items:center;justify-content:space-between;">
+          <div class="card-title">⚠️ Safety Violations</div>
+          <div class="violations-count">Showing <strong id="showing-count">0</strong> of <strong id="total-count">0</strong></div>
+        </div>
+
+        <div class="table-container" style="border:none;border-radius:0;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Worker</th>
+                <th>Violation Type</th>
+                <th>PPE Item</th>
+                <th>Date & Time</th>
+                <th>Location</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="violations-tbody">
+              <tr>
+                <td colspan="9" style="text-align:center;padding:60px;">
+                  <div class="loading-spinner" style="margin:0 auto;"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/violations.js"></script>
+</body>
+</html>

@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 import random
 
 from backend.database import SessionLocal
-import models
-from routers.auth import hash_password
+from backend import models
+from backend.routers.auth import hash_password
 
 
 DEMO_VIOLATIONS = [

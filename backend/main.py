@@ -7,7 +7,16 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 from backend.database import create_tables
-from routers import auth, media, analysis, violations, zones, reports, settings, dashboard
+from backend.routers import (
+    auth,
+    media,
+    analysis,
+    violations,
+    zones,
+    reports,
+    settings,
+    dashboard
+)
 
 # ── Create directories
 for d in ["uploads/originals", "uploads/annotated"]:
@@ -22,7 +31,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# ── CORS (allow all origins for development)
+# ── CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,8 +40,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Static files (serve uploaded originals + annotated images)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+# ── Static files
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
+)
 
 # ── Routers
 app.include_router(auth.router)
@@ -51,7 +64,7 @@ async def startup_event():
     create_tables()
 
     # Seed demo data only if DB is empty
-    from seed_data import seed_if_empty
+    from backend.seed_data import seed_if_empty
     seed_if_empty()
 
 

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from database import create_tables
+from backend.database import create_tables
 from routers import auth, media, analysis, violations, zones, reports, settings, dashboard
 
 # ── Create directories

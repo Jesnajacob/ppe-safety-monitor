@@ -8,11 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from database import get_db
+from backend.database import get_db
 import models
 from routers.auth import get_current_user
-from services.ai_detection import demo_detect
-from services.image_processor import annotate_image
+from backend.services.ai_detection import demo_detect
+from backend.services.image_processor import annotate_image
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 

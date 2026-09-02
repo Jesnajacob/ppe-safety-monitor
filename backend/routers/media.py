@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from database import get_db
+from backend.database import get_db
 import models
 from routers.auth import get_current_user
 

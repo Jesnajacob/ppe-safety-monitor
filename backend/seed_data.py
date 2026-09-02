@@ -5,7 +5,7 @@ sample violations, restricted zones, and app settings on first run.
 from datetime import datetime, timedelta
 import random
 
-from database import SessionLocal
+from backend.database import SessionLocal
 import models
 from routers.auth import hash_password
 

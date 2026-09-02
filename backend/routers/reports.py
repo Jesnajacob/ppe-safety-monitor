@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from database import get_db
+from backend.database import get_db
 import models
 from routers.auth import get_current_user
 

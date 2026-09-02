@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_
 from datetime import datetime, date
 from typing import Optional
 
-from database import get_db
+from backend.database import get_db
 import models
 from routers.auth import get_current_user
 

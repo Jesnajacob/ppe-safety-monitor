@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import Optional
 import os
 
-from database import get_db
+from backend.database import get_db
 import models
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])

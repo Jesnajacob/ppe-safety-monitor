@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
 
-from database import get_db
+from backend.database import get_db
 import models
 from routers.auth import get_current_user
 

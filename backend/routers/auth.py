@@ -12,7 +12,7 @@ from typing import Optional
 import os
 
 from backend.database import get_db
-import models
+from backend import models
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

@@ -9,8 +9,8 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
-import models
-from routers.auth import get_current_user
+from backend import models
+from backend.routers.auth import get_current_user
 from backend.services.ai_detection import demo_detect
 from backend.services.image_processor import annotate_image
 

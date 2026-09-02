@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from backend.database import get_db
-import models
-from routers.auth import get_current_user
+from backend import models
+from backend.routers.auth import get_current_user
 
 router = APIRouter(prefix="/api/media", tags=["media"])
 
